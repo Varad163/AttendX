@@ -6,7 +6,7 @@ if (!MONGODB_URI) throw new Error("Please add MONGODB_URI");
 
 let cached = (global as any).mongoose || { conn: null, promise: null };
 
-export async function connectDB() {
+export async function dbConnect() {
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {

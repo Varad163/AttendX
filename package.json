@@ -11,12 +11,15 @@
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.1",
     "bcrypt": "^6.0.0",
+    "html5-qrcode": "^2.3.8",
     "mongodb": "^6.21.0",
     "mongoose": "^8.20.0",
     "next": "16.0.3",
     "next-auth": "^4.24.13",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "react-qr-reader": "^3.0.0-beta-1",
+    "react-qr-scanner": "^1.0.0-alpha.11"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -24,6 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/react-qr-reader": "^2.1.7",
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
     "tailwindcss": "^4",

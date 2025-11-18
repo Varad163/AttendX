@@ -3,7 +3,7 @@ import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import { compare } from "bcrypt";
 import clientPromise from "./mongodb";  // adapter client
 import { User } from "@/models/User";
-import { connectDB } from "./db";
+import {  dbConnect } from "./db";
 
 export const authOptions = {
   adapter: MongoDBAdapter(clientPromise),
@@ -18,8 +18,7 @@ export const authOptions = {
       },
 
       async authorize(credentials: any) {
-        await connectDB();
-
+        await dbConnect();
         const user = await User.findOne({ email: credentials.email });
         if (!user) return null;
 

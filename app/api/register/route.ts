@@ -1,11 +1,11 @@
-import { connectDB } from "@/lib/db";
+import { dbConnect } from "@/lib/db";
 import { User } from "@/models/User";
 import { hash } from "bcrypt";
 
 export async function POST(req: Request) {
   const { name, email, password, role } = await req.json();
 
-  await connectDB();
+  await dbConnect();
 
   const exists = await User.findOne({ email });
   if (exists) return Response.json({ error: "User already exists" });
