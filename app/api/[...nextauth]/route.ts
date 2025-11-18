@@ -1,26 +1,63 @@
-import NextAuth from "next-auth";
-import { authOptions } from "@/lib/auth";
+import type { NextAuthOptions } from "next-auth";
+import SessionStrategy from "next-auth/next";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import clientPromise from "@/lib/mongodb"; // adjust import as needed
+import clientPromise from "@/lib/mongodb";
+import { dbConnect } from "@/lib/db";
+import { User } from "@/models/User";
+import { compare } from "bcrypt";
 
-// Extend the adapter user to include 'role'
-const adapter = MongoDBAdapter(clientPromise, {
-  // @ts-ignore
-  userModel: {
-    role: { type: String, required: true },
-  },
-});
+export const authOptions: NextAuthOptions = {
+  adapter: MongoDBAdapter(clientPromise),
 
-// Ensure session.strategy is typed correctly in authOptions
-const fixedAuthOptions = {
-  ...authOptions,
-  adapter,
   session: {
-    ...authOptions.session,
-    strategy: "jwt" as const, // or use SessionStrategy.JWT if imported
+    strategy: "jwt",
+  },
+
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: {},
+        password: {},
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        await dbConnect();
+
+        const user = await User.findOne({ email: credentials.email });
+        if (!user) return null;
+
+        const valid = await compare(credentials.password, user.password);
+        if (!valid) return null;
+
+        return {
+          id: user._id.toString(),
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        };
+      },
+    }),
+  ],
+
+  callbacks: {
+    async jwt({ token, user }: { token: any; user?: any }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token }:  { session: any; token: any }) {
+      session.user.id = token.id as string;
+      session.user.role = token.role as string;
+      return session;
+    },
+  },
+
+  pages: {
+    signIn: "/login",
   },
 };
-
-const handler = NextAuth(fixedAuthOptions);
-
-export { handler as GET, handler as POST };

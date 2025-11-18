@@ -1,4 +1,5 @@
-import { getServerSession, Session } from "next-auth";
+import { getServerSession } from "next-auth/next";
+import { Session } from "next-auth";
 import { redirect } from "next/navigation";
 
 type SessionUser = {

@@ -1,13 +1,17 @@
+import CredentialsProvider from "next-auth/providers/credentials";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import clientPromise from "@/lib/mongodb";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { compare } from "bcrypt";
 import { dbConnect } from "@/lib/db";
 import { User } from "@/models/User";
+import { compare } from "bcrypt";
 
+// ✔ Pure JS NextAuth config (no TS types needed)
 export const authOptions = {
   adapter: MongoDBAdapter(clientPromise),
-  session: { strategy: "jwt" },
+
+  session: {
+    strategy: "jwt",
+  },
 
   providers: [
     CredentialsProvider({
@@ -16,23 +20,23 @@ export const authOptions = {
         email: {},
         password: {},
       },
-      async authorize(credentials) {
-        await dbConnect();
 
-        if (!credentials || !credentials.email || !credentials.password) {
-          return null;
-        }
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials.password) return null;
+
+        await dbConnect();
 
         const user = await User.findOne({ email: credentials.email });
         if (!user) return null;
 
-        const ok = await compare(credentials.password, user.password);
-        if (!ok) return null;
+        const valid = await compare(credentials.password, user.password);
+        if (!valid) return null;
 
+        // Returned object is saved into JWT
         return {
           id: user._id.toString(),
-          name: user.name,
           email: user.email,
+          name: user.name,
           role: user.role,
         };
       },
@@ -40,17 +44,22 @@ export const authOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user }: { token: any; user?: any }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: any }) {
+
+    async session({ session, token }) {
       session.user.id = token.id;
       session.user.role = token.role;
       return session;
     },
+  },
+
+  pages: {
+    signIn: "/login",
   },
 };

@@ -9,25 +9,41 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  async function handleLogin(e: any) {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMsg("");
+async function handleLogin(e: any) {
+  e.preventDefault();
+  setLoading(true);
+  setErrorMsg("");
 
-    const res: any = await signIn("credentials", {
-      email,
-      password,
-      redirect: false, 
-    });
+  const res: any = await signIn("credentials", {
+    email,
+    password,
+    redirect: false,
+  });
 
-    if (res?.error) {
-      setErrorMsg("Invalid email or password!"); 
-      setLoading(false);
-      return;
-    }
-
-    window.location.href = "/"; 
+  if (res?.error) {
+    setErrorMsg("Invalid email or password!");
+    setLoading(false);
+    return;
   }
+
+  // Fetch session to read user role
+  const sessionRes = await fetch("/api/auth/session");
+  const session = await sessionRes.json();
+
+  if (!session?.user) {
+    setErrorMsg("Session error! Try again.");
+    setLoading(false);
+    return;
+  }
+
+  // Redirect based on role
+  if (session.user.role === "teacher") {
+    window.location.href = "/teacher/dashboard";
+  } else {
+    window.location.href = "/student/history";
+  }
+}
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">

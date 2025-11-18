@@ -1,4 +1,4 @@
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 import { dbConnect } from "@/lib/db";
 import Attendance from "@/models/Attendance";
@@ -30,9 +30,9 @@ declare module "next-auth/jwt" {
 }
 
 export default async function StudentHistoryPage() {
-  const session = await getServerSession();
+  const session = await getServerSession() as (import("next-auth").Session | null);
   if (!session) redirect("/login");
-  if (session.user.role !== "student") redirect("/teacher/dashboard");
+  if (!session.user || session.user.role !== "student") redirect("/teacher/dashboard");
 
   await dbConnect();
 
