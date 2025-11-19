@@ -1,61 +1,74 @@
 "use client";
 
-import { Html5QrcodeScanner } from "html5-qrcode";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Scanner } from "@yudiel/react-qr-scanner";
+
+import { useRouter } from "next/navigation";
 
 export default function ScanPage() {
-  const [status, setStatus] = useState("Scan a QR code...");
-  const [result, setResult] = useState("");
+  const [scanning, setScanning] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
+  const router = useRouter();
 
-  useEffect(() => {
-    const scanner = new Html5QrcodeScanner(
-      "qr-reader",
-      { fps: 10, qrbox: 250 },
-      false
-    );
+  const handleScan = async (result: string) => {
+    if (!result) return;
 
-    scanner.render(
-      async (decodedText) => {
-        setResult(decodedText);
-        setStatus("Validating...");
+    console.log("QR Result:", result);
+    setScanning(false);
 
-        try {
-          const parsed = JSON.parse(decodedText);
+    try {
+      // Example: send scanned QR code to backend
+      const res = await fetch("/api/attendance/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ qrCode: result }),
+      });
 
-          const res = await fetch("/api/attendance/mark", {
-            method: "POST",
-            body: JSON.stringify(parsed),
-          });
+      const data = await res.json();
 
-          const output = await res.json();
-
-          if (output.success) {
-            setStatus("✅ Attendance marked successfully!");
-          } else {
-            setStatus(`❌ ${output.error}`);
-          }
-        } catch (err) {
-          setStatus("❌ Invalid QR Code");
-        }
-      },
-      () => {}
-    );
-
-    // 👇 FIX: cleanup must NOT be async
-    return () => {
-      try {
-        scanner.clear(); // no await
-      } catch (e) {
-        console.log("Scanner cleanup failed", e);
+      if (!res.ok) {
+        setErrorMsg(data.message || "Invalid QR code!");
+        setScanning(true);
+        return;
       }
-    };
-  }, []);
+
+      // Redirect on success
+      router.push("/student/success");
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("Something went wrong");
+      setScanning(true);
+    }
+  };
 
   return (
-    <div className="p-6 flex flex-col items-center">
-      <h1 className="text-3xl font-bold text-black mb-4">Scan QR Code</h1>
-      <div id="qr-reader" className="w-72 h-72"></div>
-      <p className="mt-4 text-lg text-black">{status}</p>
+    <div className="flex flex-col items-center p-4">
+      <h1 className="text-xl font-semibold mb-4">Scan Attendance QR</h1>
+
+      {errorMsg && <p className="text-red-500 mb-3">{errorMsg}</p>}
+
+      <div className="w-full max-w-sm border rounded-lg overflow-hidden">
+        {scanning && (
+          <Scanner
+            onDecode={handleScan}
+            onError={(err: any) => console.warn("Scan Error:", err)}
+            constraints={{
+              facingMode: "environment",
+            }}
+            overlay="square"
+            videoStyle={{ width: "100%" }}
+          />
+        )}
+      </div>
+
+      <button
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+        onClick={() => setScanning((prev) => !prev)}
+      >
+        {scanning ? "Stop Scanning" : "Start Scanning"}
+      </button>
     </div>
   );
 }
