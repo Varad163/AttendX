@@ -4,24 +4,25 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt";
 import { dbConnect } from "@/lib/db";
 import { User } from "@/models/User";
+import type { NextAuthOptions } from "next-auth";
 
-export const authOptions = {
-  adapter: MongoDBAdapter(clientPromise),
-  session: { strategy: "jwt" },
+import type { SessionStrategy } from "next-auth";
+
+export const authOptions: NextAuthOptions = {
+  adapter: MongoDBAdapter(clientPromise) as any,
+
+  session: {
+    strategy: "jwt",
+  },
 
   providers: [
     CredentialsProvider({
       name: "Credentials",
-      credentials: {
-        email: {},
-        password: {},
-      },
+      credentials: { email: {}, password: {} },
       async authorize(credentials) {
         await dbConnect();
 
-        if (!credentials || !credentials.email || !credentials.password) {
-          return null;
-        }
+        if (!credentials?.email || !credentials?.password) return null;
 
         const user = await User.findOne({ email: credentials.email });
         if (!user) return null;
@@ -31,8 +32,8 @@ export const authOptions = {
 
         return {
           id: user._id.toString(),
-          name: user.name,
           email: user.email,
+          name: user.name,
           role: user.role,
         };
       },
@@ -40,17 +41,18 @@ export const authOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user }: { token: any; user?: any }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: any }) {
+    async session({ session, token }) {
       session.user.id = token.id;
       session.user.role = token.role;
       return session;
     },
   },
 };
+

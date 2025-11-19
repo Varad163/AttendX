@@ -14,17 +14,29 @@ const QRSessionSchema = new Schema(
       required: true,
     },
 
+    // One-time unique QR token (prevents screenshots)
     qrToken: {
-      type: String, // random one-time token
+      type: String,
       required: true,
     },
 
+    // QR expires after 10–20 sec
     expiresAt: {
-      type: Date, // 20-30 sec expiry
+      type: Date,
       required: true,
+    },
+
+    // Mark session active/inactive
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }
 );
 
-export default models.QRSession || mongoose.model("QRSession", QRSessionSchema);
+// Prevent model overwrite on HMR
+export const QRSession =
+  models.QRSession || mongoose.model("QRSession", QRSessionSchema);
+
+export default QRSession;
