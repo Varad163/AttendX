@@ -1,19 +1,11 @@
 import mongoose, { Schema, models } from "mongoose";
-interface QRSessionType {
-  _id: string;
-  createdAt: string;   // ⭐ REQUIRED
-  updatedAt: string;   // ⭐ Optional but recommended
-  code?: string;
-  expiresAt?: string;
-}
-
 
 const QRSessionSchema = new Schema(
   {
+    // 🔹 Make classId OPTIONAL and a STRING for now
     classId: {
-      type: Schema.Types.ObjectId,
-      ref: "Class",
-      required: true,
+      type: String,         // changed from Schema.Types.ObjectId
+      required: false,      // changed from true
     },
 
     teacherId: {
@@ -44,7 +36,7 @@ const QRSessionSchema = new Schema(
 );
 
 // Prevent model overwrite on HMR
-export const QRSession =
+const QRSession =
   models.QRSession || mongoose.model("QRSession", QRSessionSchema);
 
 export default QRSession;

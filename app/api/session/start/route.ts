@@ -1,57 +1,48 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import {authOptions} from "@/lib/auth";        // ✅ FIXED
 import { dbConnect } from "@/lib/db";
 import QRSession from "@/models/QRSession";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import crypto from "crypto";
-
 
 export async function POST() {
   try {
-    // 1. Validate teacher session
     const session = await getServerSession(authOptions);
 
     if (!session || session.user.role !== "teacher") {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     await dbConnect();
 
-    // 2. Generate QR token & expiry
+    // Generate secure token
     const qrToken = crypto.randomBytes(16).toString("hex");
 
-    const expiresAt = new Date(Date.now() + 15 * 1000); // 15 seconds expiry
+    // Expire in 15 seconds
+    const expiresAt = new Date(Date.now() + 15 * 1000);
 
-    // 3. Create QR session in DB
+    // Create DB entry
     const newSession = await QRSession.create({
-      classId: "673123456789012345678901", // <-- change if needed
       teacherId: session.user.id,
+      classId: "default", // OK now because classId is string
       qrToken,
       expiresAt,
       isActive: true,
     });
 
-    // 4. Payload student will scan inside QR
     const qrPayload = {
       sessionId: newSession._id.toString(),
-      qrToken: newSession.qrToken,
-      expiresAt: newSession.expiresAt,
+      token: qrToken,
     };
 
-    return NextResponse.json(
-      {
-        success: true,
-        qrPayload,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      success: true,
+      qrPayload,
+    });
   } catch (err) {
-    console.error("Start session error:", err);
+    console.error("START SESSION ERROR:", err);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { success: false, error: "Server error" },
       { status: 500 }
     );
   }

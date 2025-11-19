@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import Attendance from "@/models/Attendance";
 import {dbConnect} from "@/lib/db";
 

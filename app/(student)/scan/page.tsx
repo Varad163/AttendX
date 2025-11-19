@@ -3,72 +3,70 @@
 import { useState } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 
-import { useRouter } from "next/navigation";
-
-export default function ScanPage() {
+export default function StudentScanPage() {
   const [scanning, setScanning] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
-  const router = useRouter();
 
-  const handleScan = async (result: string) => {
-    if (!result) return;
+  const handleScan = async (result: any) => {
+    if (!result?.text) return;
 
-    console.log("QR Result:", result);
-    setScanning(false);
+    setScanning(false); // stop scanner to avoid multiple scans
 
     try {
-      // Example: send scanned QR code to backend
-      const res = await fetch("/api/attendance/verify", {
+      // QR contains: { id: "...", token: "..." }
+      const payload = JSON.parse(result.text);
+
+      const res = await fetch("/api/attendance/mark", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ qrCode: result }),
+        body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-
+      // ⛔ If API didn't return JSON
       if (!res.ok) {
-        setErrorMsg(data.message || "Invalid QR code!");
+        const text = await res.text();
+        console.error("SERVER ERROR:", text);
+        alert("Server Error: " + text);
         setScanning(true);
         return;
       }
 
-      // Redirect on success
-      router.push("/student/success");
+      const data = await res.json();
+
+      if (data.success) {
+        alert("🎉 Attendance Marked Successfully!");
+      } else {
+        alert("⚠️ " + data.error);
+      }
     } catch (err) {
-      console.error(err);
-      setErrorMsg("Something went wrong");
-      setScanning(true);
+      console.error("SCAN ERROR:", err);
+      alert("Invalid QR Code!");
     }
+
+    setTimeout(() => setScanning(true), 2000); // restart scanner after alert
   };
 
   return (
-    <div className="flex flex-col items-center p-4">
-      <h1 className="text-xl font-semibold mb-4">Scan Attendance QR</h1>
+    <div className="p-6 flex flex-col items-center justify-center">
+      <h1 className="text-2xl font-bold mb-4 text-black">Scan QR Code</h1>
 
-      {errorMsg && <p className="text-red-500 mb-3">{errorMsg}</p>}
-
-      <div className="w-full max-w-sm border rounded-lg overflow-hidden">
-        {scanning && (
+      <div className="w-full max-w-sm">
+        {scanning ? (
           <Scanner
             onDecode={handleScan}
-            onError={(err: any) => console.warn("Scan Error:", err)}
-            constraints={{
-              facingMode: "environment",
-            }}
-            overlay="square"
+            onError={(e:any) => console.error("Scanner error:", e)}
+            containerStyle={{ width: "100%" }}
             videoStyle={{ width: "100%" }}
           />
+        ) : (
+          <p className="text-gray-600 text-center">Processing...</p>
         )}
       </div>
 
-      <button
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
-        onClick={() => setScanning((prev) => !prev)}
-      >
-        {scanning ? "Stop Scanning" : "Start Scanning"}
-      </button>
+      <p className="text-sm text-gray-600 mt-4">
+        Align the QR inside the frame
+      </p>
     </div>
   );
 }
