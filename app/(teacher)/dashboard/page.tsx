@@ -14,7 +14,7 @@ export default async function TeacherDashboard() {
 
       <div className="space-y-4">
         <a
-          href="/dashboard/generate"
+          href="/generate"
           className="block bg-blue-600 text-white p-4 rounded text-center"
         >
           Generate QR for Attendance

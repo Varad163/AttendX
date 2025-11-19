@@ -13,6 +13,11 @@ const AttendanceSchema = new Schema(
       ref: "User",
       required: true,
     },
+    
+    studentUsername: { 
+      type: String, 
+      required: true 
+    },
 
     classId: {
       type: Schema.Types.ObjectId,

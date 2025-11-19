@@ -1,4 +1,12 @@
 import mongoose, { Schema, models } from "mongoose";
+interface QRSessionType {
+  _id: string;
+  createdAt: string;   // ⭐ REQUIRED
+  updatedAt: string;   // ⭐ Optional but recommended
+  code?: string;
+  expiresAt?: string;
+}
+
 
 const QRSessionSchema = new Schema(
   {
