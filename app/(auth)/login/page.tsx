@@ -9,46 +9,45 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-async function handleLogin(e: any) {
-  e.preventDefault();
-  setLoading(true);
-  setErrorMsg("");
+  async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg("");
 
-  const res: any = await signIn("credentials", {
-    email,
-    password,
-    redirect: false,
-  });
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
 
-  if (res?.error) {
-    setErrorMsg("Invalid email or password!");
-    setLoading(false);
-    return;
-  }
+    if (res?.error) {
+      setErrorMsg("Invalid email or password!");
+      setLoading(false);
+      return;
+    }
 
-  // Fetch session to read user role
-  const sessionRes = await fetch("/api/auth/session");
-  const session = await sessionRes.json();
+    // Fetch session
+    const sessionRes = await fetch("/api/auth/session");
+    const session = await sessionRes.json();
 
-  if (!session?.user) {
-    setErrorMsg("Session error! Try again.");
-    setLoading(false);
-    return;
-  }
+    if (!session?.user) {
+      setErrorMsg("Session error! Try again.");
+      setLoading(false);
+      return;
+    }
 
-  // Redirect based on role
-  if (session.user.role === "teacher") {
-    window.location.href = "/teacher/dashboard";
-  } else {
-    window.location.href = "/student/history";
-  }
+    // Role-based redirect
+    if (session.user.role === "teacher") {
+  window.location.href = "/dashboard";   // ✅ CORRECT
+} else {
+  window.location.href = "/history";     // ✅ CORRECT
 }
 
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white p-6 rounded-lg shadow">
-        
         <h1 className="text-2xl font-semibold text-center mb-4 text-black">
           Login
         </h1>
@@ -60,7 +59,6 @@ async function handleLogin(e: any) {
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
-
           <input
             type="email"
             placeholder="Email Address"
@@ -68,7 +66,7 @@ async function handleLogin(e: any) {
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
-              setErrorMsg("");  // reset alert
+              setErrorMsg("");
             }}
             required
           />
@@ -80,7 +78,7 @@ async function handleLogin(e: any) {
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
-              setErrorMsg(""); // reset alert
+              setErrorMsg("");
             }}
             required
           />
@@ -99,7 +97,6 @@ async function handleLogin(e: any) {
             Register
           </a>
         </p>
-
       </div>
     </div>
   );

@@ -32,7 +32,7 @@ declare module "next-auth/jwt" {
 export default async function StudentHistoryPage() {
   const session = await getServerSession() as (import("next-auth").Session | null);
   if (!session) redirect("/login");
-  if (!session.user || session.user.role !== "student") redirect("/teacher/dashboard");
+
 
   await dbConnect();
 
