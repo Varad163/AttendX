@@ -97,3 +97,4 @@ export default async function StudentHistoryPage() {
     </div>
   );
 }
+// End of file app/(student)/history/page.tsx
