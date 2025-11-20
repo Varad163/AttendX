@@ -6,8 +6,6 @@ import { dbConnect } from "@/lib/db";
 import { User } from "@/models/User";
 import type { NextAuthOptions } from "next-auth";
 
-import type { SessionStrategy } from "next-auth";
-
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise) as any,
 
@@ -19,6 +17,7 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: { email: {}, password: {} },
+
       async authorize(credentials) {
         await dbConnect();
 
@@ -45,14 +44,16 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.name = user.name;  // ⭐ FIX — add username in token
       }
       return token;
     },
+
     async session({ session, token }) {
-      session.user.id = token.id;
-      session.user.role = token.role;
+      session.user.id = token.id as string;
+      session.user.role = token.role as string;
+      session.user.name = token.name as string;  // ⭐ FIX — add username in session
       return session;
     },
   },
 };
-

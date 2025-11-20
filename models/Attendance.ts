@@ -13,10 +13,15 @@ const AttendanceSchema = new Schema(
       ref: "User",
       required: true,
     },
-    
-    studentUsername: { 
-      type: String, 
-      required: true 
+
+    studentEmail: {
+      type: String,
+      required: true,
+    },
+
+    studentUsername: {
+      type: String,
+      required: true,
     },
 
     classId: {
@@ -25,27 +30,14 @@ const AttendanceSchema = new Schema(
       required: true,
     },
 
-    studentEmail: {
-      type: String,
-      required: true,
-    },
-
     status: {
       type: String,
       enum: ["present", "late", "rejected"],
-      required: true,
-    },
-
-    location: {
-      lat: Number,
-      long: Number,
-    },
-
-    deviceId: {
-      type: String,
+      default: "present",
     },
   },
   { timestamps: true }
 );
 
-export default models.Attendance || mongoose.model("Attendance", AttendanceSchema);
+export default models.Attendance ||
+  mongoose.model("Attendance", AttendanceSchema);
