@@ -1,59 +1,195 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import QRCode from "react-qr-code";
+import { Plus, QrCode } from "lucide-react";
 
 export default function GenerateQRPage() {
-  const [qrData, setQrData] = useState<any>(null);
-  const [countdown, setCountdown] = useState(15);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [selectedClass, setSelectedClass] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
-  const generateQR = async () => {
-    try {
-      const res = await fetch("/api/session/start", { method: "POST" });
-      const data = await res.json();
+  const [className, setClassName] = useState("");
+  const [section, setSection] = useState("");
+  const [subject, setSubject] = useState("");
 
-      if (data.success) {
-        setQrData(data.qrPayload);
-        setCountdown(15);
-      }
-    } catch (err) {
-      console.error("QR ERROR:", err);
-    }
+  const [qrSessionId, setQRSessionId] = useState("");
+
+  // TEMP teacher ID (replace with getServerSession later)
+  const teacherId = "TEMP_TEACHER_ID";
+
+  const fetchClasses = async () => {
+    const res = await fetch("/api/classes/list");
+    const data = await res.json();
+    setClasses(data.classes || []);
   };
 
   useEffect(() => {
-    generateQR();
-
-    const interval = setInterval(() => generateQR(), 15000);
-    return () => clearInterval(interval);
+    fetchClasses();
   }, []);
 
-  useEffect(() => {
-    if (!qrData) return;
+  async function handleCreateClass(e: any) {
+    e.preventDefault();
 
-    const timer = setInterval(() => {
-      setCountdown((t) => (t > 0 ? t - 1 : 0));
-    }, 1000);
+    const res = await fetch("/api/classes/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: className,
+        section,
+        subject,
+        teacherId,
+      }),
+    });
 
-    return () => clearInterval(timer);
-  }, [qrData]);
+    const data = await res.json();
+
+    if (data.success) {
+      setShowModal(false);
+
+      // Refresh & auto-select newly created class
+      fetchClasses().then(() => {
+        setSelectedClass(data.class._id);
+      });
+
+      setClassName("");
+      setSection("");
+      setSubject("");
+    }
+  }
+
+  async function handleGenerateQR() {
+    if (!selectedClass) return alert("Select a class first");
+
+    const res = await fetch("/api/session/start", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ classId: selectedClass }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      setQRSessionId(data.sessionId); // show QR on same page
+    } else {
+      alert(data.message);
+    }
+  }
 
   return (
-    <div className="p-6 flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-4">Generate QR</h1>
+    <div className="min-h-screen flex items-center justify-center bg-black text-white p-4">
+      <div className="bg-slate-900/60 border border-slate-800 rounded-xl shadow-xl p-8 w-full max-w-md backdrop-blur">
+        <h1 className="text-2xl font-bold text-center mb-6">
+          Generate QR for Attendance
+        </h1>
 
-      {qrData ? (
-        <>
-          <div className="bg-white p-4 rounded shadow">
-            <QRCode value={JSON.stringify(qrData)} size={200} />
+        {/* Class Dropdown */}
+        <label className="block mb-2 text-sm text-gray-300">
+          Select Class
+        </label>
+
+        <select
+          value={selectedClass}
+          onChange={(e) => {
+            if (e.target.value === "create") {
+              setShowModal(true);
+            } else {
+              setSelectedClass(e.target.value);
+            }
+          }}
+          className="w-full p-3 bg-slate-800 border border-slate-700 rounded-lg mb-3"
+        >
+          {classes.length === 0 && (
+            <option>No classes found</option>
+          )}
+
+          {classes.map((cls) => (
+            <option key={cls._id} value={cls._id}>
+              {cls.name} ({cls.section}) - {cls.subject}
+            </option>
+          ))}
+
+          <option value="create">➕ Create New Class</option>
+        </select>
+
+        {/* Generate QR button */}
+        <button
+          onClick={handleGenerateQR}
+          className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg flex items-center justify-center gap-2 mt-3"
+        >
+          <QrCode size={18} />
+          Generate QR
+        </button>
+
+        {/* Show QR */}
+        {qrSessionId && (
+          <div className="mt-6 bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
+            <h2 className="text-lg font-semibold mb-3">Attendance QR</h2>
+
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${qrSessionId}`}
+              alt="QR Code"
+              className="mx-auto rounded-lg"
+            />
+
+            <p className="mt-3 text-gray-300 text-sm break-words">
+              Session ID: {qrSessionId}
+            </p>
           </div>
+        )}
+      </div>
 
-          <p className="mt-4">
-            ⏳ Expires in <b>{countdown}</b> sec
-          </p>
-        </>
-      ) : (
-        <p>Generating QR...</p>
+      {/* Create Class Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-slate-900 p-6 rounded-xl w-96 border border-gray-700 shadow-xl">
+            <h2 className="text-xl mb-4 flex items-center gap-2">
+              <Plus size={20} /> Create New Class
+            </h2>
+
+            <form onSubmit={handleCreateClass} className="space-y-4">
+              <input
+                type="text"
+                placeholder="Class Name"
+                required
+                value={className}
+                onChange={(e) => setClassName(e.target.value)}
+                className="w-full p-3 bg-slate-800 border border-slate-700 rounded-lg"
+              />
+
+              <input
+                type="text"
+                placeholder="Section"
+                required
+                value={section}
+                onChange={(e) => setSection(e.target.value)}
+                className="w-full p-3 bg-slate-800 border border-slate-700 rounded-lg"
+              />
+
+              <input
+                type="text"
+                placeholder="Subject"
+                required
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="w-full p-3 bg-slate-800 border border-slate-700 rounded-lg"
+              />
+
+              <button
+                type="submit"
+                className="w-full bg-green-600 hover:bg-green-700 py-2 rounded-lg"
+              >
+                Save
+              </button>
+            </form>
+
+            <button
+              onClick={() => setShowModal(false)}
+              className="mt-4 w-full text-slate-400 hover:text-white"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

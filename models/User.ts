@@ -5,7 +5,12 @@ const userSchema = new Schema({
   email: { type: String, unique: true },
   password: String,
   role: { type: String, default: "student" }, // student, teacher
-  classId: { type: String, default: null }
+
+  classId: {
+    type: Schema.Types.ObjectId,
+    ref: "Class",
+    default: null,
+  },
 });
 
 export const User = models.User || mongoose.model("User", userSchema);
