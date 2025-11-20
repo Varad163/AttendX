@@ -1,19 +1,26 @@
+import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
 import Class from "@/models/Class";
-import { NextResponse } from "next/server";
+import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth/next";
 
-export async function GET() {
+export async function GET(req: Request) {
   await dbConnect();
 
-  const classDocs = await Class.find().sort({ createdAt: -1 }).lean();
+  const session = await getServerSession(authOptions); 
+  // ❗ Now works in App Router
 
-  const classes = classDocs.map((c: any) => ({
-    id: c._id.toString(),
-    name: c.name,
-  }));
+  if (!session || session.user.role !== "teacher") {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
+
+  const classes = await Class.find({ teacherId: session.user.id }).lean();
 
   return NextResponse.json({
     success: true,
-    classes,
+    classes: classes.map((c) => ({
+      id: String(c._id),
+      name: c.name,
+    })),
   });
 }

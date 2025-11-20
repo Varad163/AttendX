@@ -18,7 +18,7 @@ export default function GenerateQRPage() {
   const teacherId = "TEMP_TEACHER_ID";
 
   const fetchClasses = async () => {
-    const res = await fetch("/api/classes/list");
+    const res = await fetch("/api/class/list");
     const data = await res.json();
     setClasses(data.classes || []);
   };
@@ -30,7 +30,7 @@ export default function GenerateQRPage() {
   async function handleCreateClass(e: any) {
     e.preventDefault();
 
-    const res = await fetch("/api/classes/create", {
+    const res = await fetch("/api/class/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -56,24 +56,24 @@ export default function GenerateQRPage() {
       setSubject("");
     }
   }
+async function handleGenerateQR() {
+  if (!selectedClass) return alert("Select a class first");
 
-  async function handleGenerateQR() {
-    if (!selectedClass) return alert("Select a class first");
+  const res = await fetch("/api/session/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ classId: selectedClass }),
+  });
 
-    const res = await fetch("/api/session/start", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ classId: selectedClass }),
-    });
+  const data = await res.json();
 
-    const data = await res.json();
-
-    if (data.success) {
-      setQRSessionId(data.sessionId); // show QR on same page
-    } else {
-      alert(data.message);
-    }
+  if (data.success) {
+    setQRSessionId(data.qrPayload.sessionId); // FIXED 🎉
+  } else {
+    alert(data.message || data.error);
   }
+}
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white p-4">

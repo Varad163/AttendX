@@ -1,31 +1,37 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/db";
 import Class from "@/models/Class";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
-    await dbConnect();
-    const { name, section, subject, teacherId } = await req.json();
+    const session = await getServerSession(authOptions);
 
-    if (!name || !section || !subject || !teacherId) {
-      return NextResponse.json(
-        { success: false, message: "Missing fields" },
-        { status: 400 }
-      );
+    if (!session || session.user.role !== "teacher") {
+      return NextResponse.json({ success: false, error: "Unauthorized" });
     }
 
-    const created = await Class.create({
+    const { name } = await req.json();
+    if (!name) {
+      return NextResponse.json({ success: false, error: "Name required" });
+    }
+
+    await dbConnect();
+
+    const newClass = await Class.create({
       name,
-      section,
-      subject,
-      teacherId
+      teacherId: session.user.id,
     });
 
-    return NextResponse.json({ success: true, class: created });
-  } catch (err: any) {
-    return NextResponse.json(
-      { success: false, message: err.message },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: true,
+      class: {
+        id: newClass._id.toString(),
+        name: newClass.name,
+      },
+    });
+  } catch (err) {
+    return NextResponse.json({ success: false, error: "Server error" });
   }
 }
