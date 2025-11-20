@@ -37,12 +37,10 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({
-      success: true,
-      qrPayload: {
-        id: newSession._id.toString(),
-        token,
-      },
-    });
+  success: true,
+  sessionId: newSession._id.toString(), // single ID for QR
+});
+
   } catch (err) {
     return NextResponse.json({ success: false, error: "Server error" });
   }

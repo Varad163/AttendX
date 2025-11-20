@@ -68,7 +68,8 @@ async function handleGenerateQR() {
   const data = await res.json();
 
   if (data.success) {
-    setQRSessionId(data.qrPayload.sessionId); // FIXED 🎉
+    setQRSessionId(data.sessionId);
+// FIXED 🎉
   } else {
     alert(data.message || data.error);
   }
