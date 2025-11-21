@@ -36,11 +36,11 @@ export default function LoginPage() {
       return;
     }
 
-    // Role-based redirect
+    
     if (session.user.role === "teacher") {
-  window.location.href = "/dashboard";   // ✅ CORRECT
+  window.location.href = "/dashboard";   
 } else {
-  window.location.href = "/history";     // ✅ CORRECT
+  window.location.href = "/history";     
 }
 
   }

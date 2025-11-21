@@ -23,7 +23,7 @@ export default function StudentScanPage() {
       }
 
       scanner.clear();
-      handleScan(parsed); // 🔥 pass JSON directly
+      handleScan(parsed); 
     }
 
     scanner.render(onScanSuccess, undefined);
@@ -38,12 +38,11 @@ export default function StudentScanPage() {
     catch { return null; }
   }
 
-  // 🔥 FIXED — DO NOT PARSE AGAIN
   async function handleScan(parsed: any) {
     const res = await fetch("/api/attendance/mark", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(parsed),   // already JSON
+      body: JSON.stringify(parsed),   
     });
 
     const data = await res.json();

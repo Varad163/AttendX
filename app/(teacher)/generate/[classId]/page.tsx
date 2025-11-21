@@ -34,9 +34,9 @@ export default function GenerateQRPage() {
   };
 
   useEffect(() => {
-    generateQR(); // generate on first load
+    generateQR(); 
 
-    const interval = setInterval(() => generateQR(), 15000); // regenerate every 15 sec
+    const interval = setInterval(() => generateQR(), 15000); 
 
     return () => clearInterval(interval);
   }, [classId]);

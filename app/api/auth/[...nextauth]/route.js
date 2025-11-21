@@ -31,7 +31,7 @@ export const authOptions = {
         return {
           id: user._id.toString(),
           email: user.email,
-          username: user.username,   // ⭐ If you store username
+          username: user.username,   
           role: user.role,
         };
       },
@@ -54,13 +54,13 @@ export const authOptions = {
       session.user.username = token.username;
       return session;
     },
-  },  // ⭐ CLOSED CALLBACKS
+  },  
 
   pages: {
     signIn: "/login",
   },
-}; // ⭐ CLOSED authOptions
+}; 
 
-// 🔥 VERY IMPORTANT — EXPORT HANDLERS
+
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

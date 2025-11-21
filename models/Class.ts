@@ -1,20 +1,20 @@
-// models/Class.ts
+
 import mongoose, { Schema, models } from "mongoose";
 
 const ClassSchema = new Schema(
   {
     name: {
       type: String,
-      required: true, // e.g. "SE-A", "FE-B", "DSA Lab"
+      required: true, 
     },
     code: {
-      type: String, // optional, like "SE-A-DSA"
+      type: String,
     },
     year: {
-      type: String, // optional: "FE", "SE", "TE", "BE"
+      type: String, 
     },
     division: {
-      type: String, // optional: "A", "B", etc.
+      type: String, 
     },
     teacherId: 
     {

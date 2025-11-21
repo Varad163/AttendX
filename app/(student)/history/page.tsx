@@ -43,7 +43,6 @@ export default async function StudentHistoryPage() {
 </div>
 
 
-      {/* Empty State */}
       {attendance.length === 0 && (
         <div className="text-center mt-12">
           <XCircle className="w-12 h-12 text-gray-500 mx-auto" />
@@ -51,14 +50,13 @@ export default async function StudentHistoryPage() {
         </div>
       )}
 
-      {/* List */}
       <div className="space-y-4">
         {attendance.map((item) => (
           <div
             key={item._id}
             className="bg-gray-900/40 border border-gray-700 rounded-xl p-5 shadow-md hover:shadow-xl transition"
           >
-            {/* Session ID + Status */}
+            
             <div className="flex items-center justify-between mb-2">
               <p className="text-gray-300 text-sm">Session ID</p>
               <span
@@ -76,23 +74,19 @@ export default async function StudentHistoryPage() {
               {item.sessionId}
             </p>
 
-            {/* Class ID */}
             <div className="flex items-center gap-2 text-gray-400 text-sm">
               <Calendar size={16} />
               <span className="font-medium">Class ID:</span> {item.classId}
             </div>
 
-            {/* Time */}
             <div className="flex items-center gap-2 text-gray-400 text-sm mt-1">
               <Clock size={16} />
               <span className="font-medium">Time:</span>{" "}
               {new Date(item.createdAt).toLocaleString()}
             </div>
 
-            {/* Divider */}
             <div className="border-t border-gray-700 my-3"></div>
 
-            {/* Footer */}
             <p className="text-xs text-gray-500">
               ✔️ Marked automatically using QR
             </p>
@@ -102,4 +96,3 @@ export default async function StudentHistoryPage() {
     </div>
   );
 }
-// End of file app/(student)/history/page.tsx

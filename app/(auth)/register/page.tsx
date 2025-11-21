@@ -55,7 +55,6 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           
-          {/* Black border + black text + black placeholder */}
           <input
             name="name"
             onChange={handleChange}

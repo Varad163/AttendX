@@ -117,7 +117,6 @@ async function handleGenerateQR() {
           <option value="create">➕ Create New Class</option>
         </select>
 
-        {/* Generate QR button */}
         <button
           onClick={handleGenerateQR}
           className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg flex items-center justify-center gap-2 mt-3"
@@ -126,7 +125,6 @@ async function handleGenerateQR() {
           Generate QR
         </button>
 
-        {/* Show QR */}
         {qrSessionId && (
           <div className="mt-6 bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
             <h2 className="text-lg font-semibold mb-3">Attendance QR</h2>
@@ -145,7 +143,6 @@ async function handleGenerateQR() {
         )}
       </div>
 
-      {/* Create Class Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-slate-900 p-6 rounded-xl w-96 border border-gray-700 shadow-xl">

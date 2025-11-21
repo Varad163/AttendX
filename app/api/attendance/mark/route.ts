@@ -16,7 +16,6 @@ export async function POST(req: Request) {
     const { id, token } = await req.json();
     await dbConnect();
 
-    // Validate QR session
     const qrSession = await QRSession.findOne({
       _id: id,
       qrToken: token,
@@ -28,11 +27,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Invalid Session" });
     }
 
-    // Fallback username logic
+    
     const username =
       session.user.name || session.user.email?.split("@")[0] || "unknown";
 
-    // Create attendance
     await Attendance.create({
       sessionId: qrSession._id,
       classId: qrSession.classId,

@@ -11,9 +11,9 @@ export default async function TeacherDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-slate-100">
       <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-10 sm:px-6 lg:px-8">
-        {/* Header */}
+    
         <header className="mb-8 flex items-center justify-between gap-4">
-  {/* LEFT SIDE TITLE */}
+
   <div>
     <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
       Teacher Dashboard
@@ -23,10 +23,8 @@ export default async function TeacherDashboard() {
     </p>
   </div>
 
-  {/* RIGHT SIDE – PROFILE + LOGOUT */}
   <div className="flex items-center gap-4">
 
-    {/* PROFILE */}
     <div className="hidden items-center gap-3 rounded-full bg-slate-800/60 px-3 py-2 text-sm shadow-lg sm:flex">
       <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 font-semibold text-white">
         {session.user?.name?.[0]?.toUpperCase() ?? "T"}
@@ -39,15 +37,13 @@ export default async function TeacherDashboard() {
       </div>
     </div>
 
-    {/* LOGOUT BUTTON */}
     <LogoutButton />
   </div>
 </header>
 
 
-        {/* Content */}
         <main className="flex flex-1 flex-col gap-6">
-          {/* Overview card */}
+        
           <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-xl backdrop-blur">
             <h2 className="text-lg font-semibold text-slate-50">
               Quick actions
@@ -57,7 +53,7 @@ export default async function TeacherDashboard() {
             </p>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {/* Generate QR card */}
+             
               <Link
                 href="/generate"
                 className="group flex flex-col justify-between rounded-xl border border-blue-500/30 bg-gradient-to-br from-blue-600/70 via-blue-500/70 to-indigo-600/70 p-[1px] shadow-lg transition hover:-translate-y-0.5 hover:shadow-blue-500/40"
@@ -79,7 +75,6 @@ export default async function TeacherDashboard() {
                 </div>
               </Link>
 
-              {/* Sessions history card */}
               <Link
                 href="/sessions"
                 className="group flex flex-col justify-between rounded-xl border border-slate-700/70 bg-slate-900/80 p-4 shadow-lg transition hover:-translate-y-0.5 hover:border-slate-500"
@@ -102,8 +97,6 @@ export default async function TeacherDashboard() {
             </div>
           </section>
 
-          {/* (Optional) Stats placeholder */}
-          {/* You can fill this later with real data */}
           <section className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
               <p className="text-xs text-slate-400">Today&apos;s sessions</p>

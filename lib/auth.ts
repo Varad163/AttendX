@@ -32,7 +32,6 @@ export const authOptions: NextAuthOptions = {
         const ok = await compare(credentials.password, user.password);
         if (!ok) return null;
 
-        // Returned object is stored inside JWT token
         return {
           id: user._id.toString(),
           email: user.email,
@@ -45,7 +44,7 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    // 🔐 Add user fields to JWT token
+    
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
@@ -55,7 +54,6 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
 
-    // 🔐 Make token values available in session.user
     async session({ session, token }) {
       session.user.id = token.id as string;
       session.user.role = token.role as string;

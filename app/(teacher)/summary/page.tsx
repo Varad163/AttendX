@@ -27,7 +27,6 @@ export default function AttendanceSummaryPage() {
     <div className="p-6 max-w-3xl mx-auto text-black">
       <h1 className="text-3xl font-bold mb-6">Attendance Summary</h1>
 
-      {/* CLASS SELECT */}
       <select
         className="border p-2 rounded w-full mb-4"
         value={classId}
@@ -37,10 +36,9 @@ export default function AttendanceSummaryPage() {
         <option value="CE-1">CE-1</option>
         <option value="CE-2">CE-2</option>
         <option value="CE-3">CE-3</option>
-        {/* Replace with dynamic later */}
+     
       </select>
 
-      {/* DATE SELECT */}
       <input
         type="date"
         className="border p-2 rounded w-full mb-4"
@@ -55,7 +53,6 @@ export default function AttendanceSummaryPage() {
         View Attendance
       </button>
 
-      {/* RESULTS */}
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-2">Present Students</h2>
         <ul className="space-y-2">
