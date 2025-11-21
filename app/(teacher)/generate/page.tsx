@@ -69,11 +69,11 @@ async function handleGenerateQR() {
 
   if (data.success) {
     const payload = {
-      sessionId: data.sessionId,
-      classId: selectedClass,
+      id: data.id,
+      token: data.token,
     };
 
-    setQRSessionId(JSON.stringify(payload)); // store full JSON payload
+    setQRSessionId(JSON.stringify(payload));
   } else {
     alert(data.error || "QR generation failed");
   }
