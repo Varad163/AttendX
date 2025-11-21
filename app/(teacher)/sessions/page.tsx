@@ -1,71 +1,124 @@
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/auth";
+
 import QRSession from "@/models/QRSession";
+import ClassModel from "@/models/Class";
+import Attendance from "@/models/Attendance";
 import { dbConnect } from "@/lib/db";
-import { BadgeCheck, Clock, Calendar, QrCode } from "lucide-react";
 
-export default async function TeacherSessionsPage() {
-  const session = await getServerSession();
+export default async function SessionsPage() {
+  const session = await getServerSession(authOptions);
 
-  if (!session) redirect("/login");
-  if (session.user.role !== "teacher") redirect("/history");
+  if (!session || session.user.role !== "teacher") {
+    redirect("/login");
+  }
 
   await dbConnect();
 
-  // Fetch teacher’s sessions
-  const sessions = await QRSession.find({ teacherId: session.user.id })
+  // STEP 1 → fetch all classes of teacher
+  const classes = await ClassModel.find({
+    teacherId: session.user.id,
+  })
     .sort({ createdAt: -1 })
     .lean();
 
+  // STEP 2 → fetch all sessions of teacher
+  const qrSessions = await QRSession.find({
+    teacherId: session.user.id,
+  })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  // STEP 3 → attach attendance count to each session
+  for (let s of qrSessions) {
+    const count = await Attendance.countDocuments({ sessionId: s._id });
+    s.attendanceCount = count;
+  }
+
+  // STEP 4 → group sessions under their class
+  const grouped: any = {};
+
+  classes.forEach((cls: any) => {
+    grouped[cls._id] = {
+      class: cls,
+      sessions: [],
+    };
+  });
+
+  qrSessions.forEach((session: any) => {
+    if (grouped[session.classId]) {
+      grouped[session.classId].sessions.push(session);
+    }
+  });
+
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-black">📚 Previous QR Sessions</h1>
+    <div className="min-h-screen bg-slate-950 text-slate-100 py-10 px-6">
+      <div className="max-w-4xl mx-auto">
 
-      {sessions.length === 0 && (
-        <p className="text-gray-600">No sessions found yet.</p>
-      )}
+        {/* PAGE TITLE */}
+        <h1 className="text-3xl font-bold mb-6">📚 Class-wise Attendance Sessions</h1>
 
-      <div className="space-y-4">
-        {sessions.map((s: any) => {
-          const isExpired = new Date(s.expiresAt) < new Date();
+        {/* NO CLASSES */}
+        {classes.length === 0 && (
+          <p className="text-slate-400">You have not created any classes yet.</p>
+        )}
+
+        {/* RENDER CLASS GROUPS */}
+        {Object.values(grouped).map((item: any) => {
+          const cls = item.class;
+          const sessions = item.sessions;
 
           return (
-            <a
-              key={s._id}
-              href={`/sessions/${s._id}`}
-              className="block p-4 border rounded-lg bg-white shadow hover:shadow-md transition"
+            <div
+              key={cls._id}
+              className="mb-8 p-5 rounded-xl bg-slate-900 border border-slate-700"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-lg font-semibold text-black flex items-center gap-2">
-                    <QrCode className="w-5 h-5" />
-                    Session ID: {s._id}
+              {/* CLASS TITLE */}
+              <h2 className="text-xl font-semibold mb-3">
+                📘 {cls.name}{" "}
+                {cls.division && (
+                  <span className="text-slate-400 text-sm">({cls.division})</span>
+                )}
+              </h2>
+
+              {/* NO SESSIONS */}
+              {sessions.length === 0 && (
+                <p className="text-slate-500 text-sm">No sessions created yet.</p>
+              )}
+
+              {/* SESSION LIST */}
+              {sessions.map((s: any) => (
+                <div
+                  key={s._id}
+                  className="mb-4 p-4 bg-slate-800 rounded-lg border border-slate-600"
+                >
+                  <p className="text-sm text-slate-400">
+                    Session ID: <span className="text-white">{s._id.toString()}</span>
                   </p>
 
-                  <p className="text-gray-700 mt-1 flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    Created: {new Date(s.createdAt).toLocaleString()}
-                  </p>
-
-                  <p className="text-gray-700 mt-1 flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    Expires: {new Date(s.expiresAt).toLocaleString()}
-                  </p>
-                </div>
-
-                <div>
-                  {isExpired ? (
-                    <span className="text-red-600 text-sm font-semibold">
-                      🔴 Expired
+                  <p className="text-sm text-slate-400 mt-1">
+                    Time:{" "}
+                    <span className="text-white">
+                      {new Date(s.createdAt).toLocaleString()}
                     </span>
+                  </p>
+
+                  <p className="text-sm text-slate-400 mt-1">
+                    Attendance Marked:{" "}
+                    <span className="text-green-400 font-bold">
+                      {s.attendanceCount}
+                    </span>
+                  </p>
+
+                  {!s.isActive ? (
+                    <p className="mt-2 text-xs text-red-400">Expired</p>
                   ) : (
-                    <span className="text-green-600 text-sm font-semibold">
-                      🟢 Active
-                    </span>
+                    <p className="mt-2 text-xs text-green-400">Active</p>
                   )}
                 </div>
-              </div>
-            </a>
+              ))}
+            </div>
           );
         })}
       </div>

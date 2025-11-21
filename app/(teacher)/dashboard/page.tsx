@@ -13,6 +13,7 @@ export default async function TeacherDashboard() {
       <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-10 sm:px-6 lg:px-8">
         {/* Header */}
         <header className="mb-8 flex items-center justify-between gap-4">
+  {/* LEFT SIDE TITLE */}
   <div>
     <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
       Teacher Dashboard
@@ -22,23 +23,27 @@ export default async function TeacherDashboard() {
     </p>
   </div>
 
-  <LogoutButton />
+  {/* RIGHT SIDE – PROFILE + LOGOUT */}
+  <div className="flex items-center gap-4">
 
+    {/* PROFILE */}
+    <div className="hidden items-center gap-3 rounded-full bg-slate-800/60 px-3 py-2 text-sm shadow-lg sm:flex">
+      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 font-semibold text-white">
+        {session.user?.name?.[0]?.toUpperCase() ?? "T"}
+      </div>
+      <div className="leading-tight">
+        <p className="font-medium">{session.user?.name ?? "Teacher"}</p>
+        <p className="text-xs text-slate-400">
+          {session.user?.email ?? "Logged in"}
+        </p>
+      </div>
+    </div>
 
+    {/* LOGOUT BUTTON */}
+    <LogoutButton />
+  </div>
+</header>
 
-          {/* Optional avatar / initial circle */}
-          <div className="hidden items-center gap-3 rounded-full bg-slate-800/60 px-3 py-2 text-sm shadow-lg sm:flex">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 font-semibold text-white">
-              {session.user?.name?.[0]?.toUpperCase() ?? "T"}
-            </div>
-            <div className="leading-tight">
-              <p className="font-medium">{session.user?.name ?? "Teacher"}</p>
-              <p className="text-xs text-slate-400">
-                {session.user?.email ?? "Logged in"}
-              </p>
-            </div>
-          </div>
-        </header>
 
         {/* Content */}
         <main className="flex flex-1 flex-col gap-6">
