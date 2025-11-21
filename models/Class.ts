@@ -16,7 +16,8 @@ const ClassSchema = new Schema(
     division: {
       type: String, // optional: "A", "B", etc.
     },
-    teacherId: {
+    teacherId: 
+    {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,

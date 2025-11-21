@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import LogoutButton from "@/components/LogoutButton";
 
 export default async function TeacherDashboard() {
   const session = await getServerSession();
@@ -12,14 +13,18 @@ export default async function TeacherDashboard() {
       <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-10 sm:px-6 lg:px-8">
         {/* Header */}
         <header className="mb-8 flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Teacher Dashboard
-            </h1>
-            <p className="mt-2 text-sm text-slate-300 sm:text-base">
-              Manage attendance, generate QR codes, and review previous sessions.
-            </p>
-          </div>
+  <div>
+    <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+      Teacher Dashboard
+    </h1>
+    <p className="mt-2 text-sm text-slate-300 sm:text-base">
+      Manage attendance, generate QR codes, and review previous sessions.
+    </p>
+  </div>
+
+  <LogoutButton />
+
+
 
           {/* Optional avatar / initial circle */}
           <div className="hidden items-center gap-3 rounded-full bg-slate-800/60 px-3 py-2 text-sm shadow-lg sm:flex">

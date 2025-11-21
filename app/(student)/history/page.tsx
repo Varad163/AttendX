@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Attendance from "@/models/Attendance";
 import { dbConnect } from "@/lib/db";
 import { Calendar, Clock, CheckCircle2, XCircle } from "lucide-react";
+import LogoutButton from "@/components/LogoutButton";
 
 export default async function StudentHistoryPage() {
   const session = (await getServerSession()) as any;
@@ -26,17 +27,21 @@ export default async function StudentHistoryPage() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-extrabold text-white">📘 My Attendance</h1>
+     <div className="flex items-center justify-between mb-6">
+  <h1 className="text-3xl font-extrabold text-white">📘 My Attendance</h1>
 
-        <a
-          href="/scan"
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 transition text-white rounded-lg shadow"
-        >
-          Scan QR
-        </a>
-      </div>
+  <div className="flex gap-3">
+    <a
+      href="/scan"
+      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 transition text-white rounded-lg shadow"
+    >
+      Scan QR
+    </a>
+
+    <LogoutButton />
+  </div>
+</div>
+
 
       {/* Empty State */}
       {attendance.length === 0 && (

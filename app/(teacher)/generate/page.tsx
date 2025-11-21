@@ -68,10 +68,14 @@ async function handleGenerateQR() {
   const data = await res.json();
 
   if (data.success) {
-    setQRSessionId(data.sessionId);
-// FIXED 🎉
+    const payload = {
+      sessionId: data.sessionId,
+      classId: selectedClass,
+    };
+
+    setQRSessionId(JSON.stringify(payload)); // store full JSON payload
   } else {
-    alert(data.message || data.error);
+    alert(data.error || "QR generation failed");
   }
 }
 
@@ -104,10 +108,11 @@ async function handleGenerateQR() {
           )}
 
           {classes.map((cls) => (
-            <option key={cls._id} value={cls._id}>
-              {cls.name} ({cls.section}) - {cls.subject}
-            </option>
-          ))}
+  <option key={cls.id} value={cls.id}>
+    {cls.name} ({cls.section}) - {cls.subject}
+  </option>
+))}
+
 
           <option value="create">➕ Create New Class</option>
         </select>
@@ -127,10 +132,11 @@ async function handleGenerateQR() {
             <h2 className="text-lg font-semibold mb-3">Attendance QR</h2>
 
             <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${qrSessionId}`}
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrSessionId)}`}
               alt="QR Code"
               className="mx-auto rounded-lg"
             />
+
 
             <p className="mt-3 text-gray-300 text-sm break-words">
               Session ID: {qrSessionId}

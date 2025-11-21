@@ -33,15 +33,18 @@ export async function POST(req: Request) {
       classId,
       teacherId: session.user.id,
       qrToken: token,
+      isActive: true,
       expiresAt: new Date(Date.now() + 15000),
     });
 
     return NextResponse.json({
-  success: true,
-  sessionId: newSession._id.toString(), // single ID for QR
-});
+      success: true,
+      id: newSession._id.toString(),   // 👈 REQUIRED
+      token: newSession.qrToken        // 👈 REQUIRED
+    });
 
   } catch (err) {
+    console.error("SESSION CREATE ERROR:", err);
     return NextResponse.json({ success: false, error: "Server error" });
   }
 }
